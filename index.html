@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Analyzer - Candidate Evaluation</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+</head>
+<body class="dark-theme">
+  <!-- Dynamic Background Wrapper for Glassmorphism -->
+  <div class="bg-shapes">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="app-container glass-panel">
+    
+    <header>
+      <div class="logo">
+        <i data-lucide="brain-circuit" class="logo-icon"></i>
+        <span>Resume Analyzer</span>
+      </div>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <div class="status-badge" id="app-status">Ready</div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      
+      <!-- VIEW: RECRUITER LOGIN -->
+      <section id="view-recruiter-login" class="view active" style="align-items: center; justify-content: center; height: 100%;">
+        <div class="glass-card auth-card" style="text-align: center; max-width: 500px; width: 100%; padding: 4rem 2.5rem; display: flex; flex-direction: column; gap: 2.5rem;">
+          <div>
+            <div class="icon-circle"><i data-lucide="building-2"></i></div>
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 700;">Recruiter <span class="gradient-text">Portal</span></h1>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 1rem; text-align: left;">
+            <div class="input-container">
+              <label>Company Name <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="rec-company" class="glass-input modern-input" placeholder="e.g. Acme Corp">
+            </div>
+            <div class="input-container">
+              <label>Recruiter Name (Optional)</label>
+              <input type="text" id="rec-name" class="glass-input modern-input" placeholder="e.g. John Doe">
+            </div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <button id="btn-rec-login" class="primary-btn glow" style="width: 100%; justify-content: center;"><i data-lucide="log-in"></i> Login to Portal</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: COMPANY HUB -->
+      <section id="view-hub" class="view hidden" style="align-items: center; justify-content: center; height: 100%;">
+        <div class="glass-card dashboard-hub" style="text-align: center; max-width: 650px; width: 100%; padding: 4rem 3rem;">
+          <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 800;">Welcome, <span id="hub-company-name" class="gradient-text">Company</span></h2>
+          <p style="color: var(--text-muted); font-size: 1.15rem; margin-bottom: 3rem;">Your company database has been successfully initialized. What would you like to do?</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="hub-action-card" id="btn-hub-admin" style="padding: 2.5rem 1rem;">
+              <i data-lucide="database"></i>
+              <h3 style="font-size: 1.4rem;">Candidate DB</h3>
+              <p>View all tests completed under your company</p>
+            </div>
+            <div class="hub-action-card" id="btn-hub-kiosk" style="padding: 2.5rem 1rem;">
+              <i data-lucide="user-plus"></i>
+              <h3 style="font-size: 1.4rem;">Invite Candidate</h3>
+              <p>Launch the portal for the next candidate to log in</p>
+            </div>
+          </div>
+          <button class="btn-back-welcome ghost-btn" style="margin: 3rem auto 0; color: var(--text-muted);"><i data-lucide="log-out"></i> End Session</button>
+        </div>
+      </section>
+
+      <!-- VIEW: CANDIDATE LOGIN -->
+      <section id="view-candidate-login" class="view hidden" style="align-items: center; justify-content: center; height: 100%;">
+        <div class="glass-card auth-card" style="text-align: center; max-width: 550px; width: 100%; padding: 3.5rem 2.5rem; display: flex; flex-direction: column; gap: 2rem;">
+          <div>
+            <div class="icon-circle" style="background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(59,130,246,0.2)); border-color: rgba(16,185,129,0.3); box-shadow: 0 0 30px rgba(16,185,129,0.2);"><i data-lucide="user" style="color: var(--accent);"></i></div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: 700;">Candidate <span style="color: var(--accent);">Portal</span></h1>
+            <p style="color: var(--text-muted); font-size: 1rem;">Complete your profile to begin the assessment.</p>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 1rem; text-align: left;">
+            <div class="input-container">
+              <label>Target Company <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="cand-company" class="glass-input modern-input" placeholder="e.g. Acme Corp">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="input-container">
+                <label>Full Name <span style="color:var(--danger)">*</span></label>
+                <input type="text" id="cand-name" class="glass-input modern-input" placeholder="John Doe">
+              </div>
+              <div class="input-container">
+                <label>Job Role <span style="color:var(--danger)">*</span></label>
+                <input type="text" id="cand-role" class="glass-input modern-input" placeholder="e.g. Engineer">
+              </div>
+            </div>
+            <div class="input-container">
+              <label>Email Address <span style="color:var(--danger)">*</span></label>
+              <input type="email" id="cand-email" class="glass-input modern-input" placeholder="john@example.com">
+            </div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <button id="btn-cand-login" class="primary-btn glow" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #10b981, #059669);"><i data-lucide="play-circle"></i> Start Assessment</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: UPLOAD / LANDING PAGE -->
+      <section id="view-upload" class="view hidden hero-layout">
+        <div class="hero-content">
+          <div class="tagline">Next-Generation Hiring Platform</div>
+          <h1>AI-Driven <br><span class="gradient-text">Proctored Assessments</span></h1>
+          <p>Instantly extract developer skills from resumes and automatically generate adaptive, proctored technical exams tailored to the candidate's exact profile. Automate your technical screening pipeline in seconds.</p>
+          <ul class="hero-benefits">
+            <li><i data-lucide="check-circle-2"></i> Real-time AI Face Detection</li>
+            <li><i data-lucide="check-circle-2"></i> Anti-Cheat Tab Locking</li>
+            <li><i data-lucide="check-circle-2"></i> Dynamic Question Generation</li>
+          </ul>
+        </div>
+        
+        <div class="upload-container glass-card">
+          <div class="drop-zone" id="drop-zone">
+            <i data-lucide="file-up" class="drop-icon"></i>
+            <h3>Drag & Drop Resume</h3>
+            <p>Upload a PDF to begin candidate analysis</p>
+            <input type="file" id="file-input" accept="application/pdf" hidden>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: DASHBOARD -->
+      <section id="view-dashboard" class="view hidden">
+        <div class="dashboard-header">
+          <h2>Candidate Profile Analysis</h2>
+          <button id="btn-start-test" class="primary-btn glow">Register & Start Test <i data-lucide="arrow-right"></i></button>
+        </div>
+        
+        <div class="dashboard-grid">
+          <div class="card glass-card metrics-card">
+            <h3>Profile Strength</h3>
+            <div class="score-circle">
+              <span id="overall-score">--</span>
+            </div>
+            <p style="margin-top:1rem; font-weight:600; font-size: 0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Verified Skills (Click to Remove):</p>
+            <div id="editable-skills-container" style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:center; margin-top:0.5rem;"></div>
+          </div>
+          
+          <div class="card glass-card chart-card">
+            <h3>Skill Map Analysis</h3>
+            <canvas id="skillChart"></canvas>
+          </div>
+
+          <div class="card glass-card missing-skills-card">
+            <h3>Gap Analysis</h3>
+            <ul id="missing-skills-list">
+              <li>Loading missing skills...</li>
+            </ul>
+          </div>
+          
+          <div class="card glass-card job-match-card">
+            <h3>Best Role Match</h3>
+            <div class="role-match" id="job-role-match">Analyzing...</div>
+            <p class="role-desc" id="job-role-desc">Comparing extracted skills to industry standard roles.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ASSESSMENT (PROCTORED) -->
+      <section id="view-assessment" class="view hidden">
+        <div class="assessment-layout">
+          <div class="proctoring-panel glass-card">
+            <div class="cam-wrapper">
+              <video id="webcam" autoplay muted playsinline></video>
+              <canvas id="face-canvas"></canvas>
+              <div id="cam-warning" class="warning-overlay hidden">
+                <i data-lucide="alert-triangle"></i>
+                <p>Face Not Detected!</p>
+              </div>
+            </div>
+            <div class="proctor-status">
+              <h3>Secure Proctoring</h3>
+              <ul>
+                <li><i data-lucide="shield-check"></i> Fullscreen enforced</li>
+                <li><i data-lucide="eye"></i> AI face tracking <span id="face-status-dot" class="dot red"></span></li>
+                <li><i data-lucide="lock"></i> Anti-copy & Tab-lock enabled</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="quiz-panel glass-card">
+            <div class="quiz-header">
+              <h2>Technical Assessment</h2>
+              <div class="timer" id="quiz-timer">--:--</div>
+            </div>
+            <div class="question-container" id="question-container">
+              <h3 id="question-text">Initializing Secure Environment...</h3>
+              <div class="options-grid" id="options-grid"></div>
+            </div>
+            <div class="quiz-footer">
+              <span id="question-counter">Question -- / --</span>
+              <button id="btn-next-question" class="primary-btn" disabled>Next Question <i data-lucide="chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- VIEW: RESULTS -->
+      <section id="view-results" class="view hidden">
+        <div class="hero-text" style="padding-top: 2rem; margin-bottom: 2rem;">
+          <h1>Assessment Analytics</h1>
+          <p>Here is your final performance breakdown.</p>
+        </div>
+        <div class="dashboard-grid">
+          <div class="card glass-card metrics-card" style="grid-column: span 12; padding: 2rem; flex-direction: row; gap: 4rem;">
+            <div style="flex: 1; text-align: left;">
+              <h2 id="final-qualification" style="font-size: 2.5rem; margin-bottom: 0.5rem;">Analyzing...</h2>
+              <p id="final-feedback" style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.5;">Checking your theoretical and applied knowledge...</p>
+            </div>
+            <div style="text-align: center;">
+              <h3>Final Accuracy</h3>
+              <div class="score-circle" style="margin-top: 1rem;"><span id="final-score-text">--%</span></div>
+            </div>
+          </div>
+          
+          <div class="card glass-card" style="grid-column: span 12;">
+            <h3>Individual Skill Proficiency</h3>
+            <div id="skill-progress-bars" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;"></div>
+          </div>
+          
+          <div class="card glass-card" style="grid-column: span 12;">
+            <h3>Granular Question Review</h3>
+            <div id="question-review-list" class="review-list"></div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem; margin-bottom: 2rem; display: flex; gap: 1.5rem; justify-content: center;">
+          <button id="btn-download-report" class="ghost-btn" style="border-color: #38bdf8; color: #38bdf8;">Download Report File <i data-lucide="download"></i></button>
+          <button id="btn-restart" class="primary-btn glow">Process Next Candidate <i data-lucide="rotate-ccw"></i></button>
+        </div>
+      </section>
+
+      <!-- VIEW: ADMIN DASHBOARD (DATABASE) -->
+      <section id="view-admin" class="view hidden">
+        <div class="dashboard-header" style="margin-bottom: 2rem;">
+          <h2>Recruiter Database</h2>
+          <button id="btn-admin-home" class="ghost-btn"><i data-lucide="home"></i> Home</button>
+        </div>
+        <div class="glass-card" style="padding: 0; overflow: hidden;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Candidate Name</th>
+                <th>Role Applied</th>
+                <th>Core Skills</th>
+                <th>Assessment Score</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body">
+              <!-- JS Populated -->
+            </tbody>
+          </table>
+          <div id="admin-empty-state" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+            No candidates have taken the assessment yet.
+          </div>
+        </div>
+        <div style="text-align: right; margin-top: 1.5rem;">
+          <button id="btn-clear-db" class="ghost-btn" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">Clear Database</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  
+  <!-- Overlay Loading -->
+  <div id="loading-overlay" class="overlay hidden glass-panel">
+    <i data-lucide="loader-2" class="spin"></i>
+    <h2 id="loading-text">Analyzing Artificial Intelligence Vectors...</h2>
+  </div>
+
+  <!-- Level Selection Modal -->
+  <div id="level-modal" class="overlay hidden glass-panel" style="background: rgba(2, 6, 23, 0.85);">
+    <div class="glass-card" style="text-align: center; max-width: 500px; width: 90%; padding: 3rem;">
+      <h2 style="margin-bottom: 0.5rem;">Select Experience Level</h2>
+      <p style="color: var(--text-muted); margin-bottom: 2rem;">We will tailor the assessment questions to your expertise level.</p>
+      <div class="options-grid">
+        <button class="option-btn level-btn" data-level="beginner">Beginner (0-2 Yrs Experience)</button>
+        <button class="option-btn level-btn" data-level="intermediate">Intermediate (3-5 Yrs Experience)</button>
+        <button class="option-btn level-btn" data-level="specialized">Specialized (5+ Yrs Experience)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "proctorai",
+  "version": "1.0.0",
+  "description": "ProctorAI Backend Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
